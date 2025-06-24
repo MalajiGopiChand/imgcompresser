@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compress - Online Image Compressor</title>
+    <head>
+    <!-- Add this with your other favicon links -->
+    <link rel="icon" type="image/png" href="C:\Users\Gopi\img com\download.png">
+</head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/compressorjs@1.1.1/dist/compressor.min.js"></script>
+    <style>
+        .dropzone {
+            transition: all 0.3s ease;
+        }
+        .dropzone.active {
+            border-color: #4F46E5;
+            background-color: #EEF2FF;
+        }
+        .comparison-slider {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .comparison-slider .before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .comparison-slider .after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .comparison-slider .slider-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background-color: white;
+            cursor: ew-resize;
+            z-index: 10;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+        .comparison-slider .slider-handle:after {
+            content: "↔";
+            position: absolute;
+            top: 50%;
+            left: -12px;
+            width: 30px;
+            height: 30px;
+            background: #4F46E5;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+             <div class="flex items-center justify-center">
+        <!-- Add your logo image here -->
+        <img src="C:\Users\Gopi\img com\download.png" alt="Image Compressor Logo" class="h-12 w-12 mr-3">
+        
+    </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Image Compresser</h1>
+            <p class="text-gray-600 dark:text-gray-300">Compress your images online without losing quality</p>
+        </header>
+
+
+        <!-- Main Content -->
+        <main>
+            <!-- Upload Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                <div id="upload-section">
+                    <div id="dropzone" class="dropzone border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer mb-4">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-1">Drag & drop your images here</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">or click to browse files</p>
+                            <p class="text-gray-400 dark:text-gray-500 text-xs mt-2">Supports JPG, PNG, GIF, SVG, WebP (Max 10MB each)</p>
+                        </div>
+                            <label for="file-input" class="sr-only">Select image files to upload</label>
+                            <input type="file" id="file-input" class="hidden" accept="image/*" multiple title="Select image files to upload">
+                    </div>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <button id="upload-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition">Select Files</button>
+                        <button id="sample-btn" class="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg transition">Use Sample Image</button>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings-section" class="hidden">
+                    <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">Compression Settings</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="quality-slider" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quality: <span id="quality-value">80</span>%</label>
+                            <input type="range" id="quality-slider" min="1" max="100" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label for="width-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Resize (width in pixels):</label>
+                            <input type="number" id="width-input" placeholder="Original width" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="keep-aspect" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:border-gray-600" checked>
+                            <label for="keep-aspect" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Maintain aspect ratio</label>
+                        </div>
+                        <div>
+                            <label for="format-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Output Format:</label>
+                            <select id="format-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                                <option value="auto">Same as original</option>
+                                <option value="jpeg">JPEG</option>
+                                <option value="png">PNG</option>
+                                <option value="webp">WebP</option>
+                            </select>
+                        </div>
+                        <button id="compress-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition">Compress Images</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Compression Results</h2>
+                <div id="results-container" class="space-y-6">
+                    <!-- Results will be added here dynamically -->
+                </div>
+                <div class="mt-6">
+                    <button id="download-all-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition hidden">Download All</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+            <p>© 2023 ImageCompress. All rights reserved.</p>
+            <p class="mt-1">Built with HTML, Tailwind CSS, and JavaScript</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const sampleBtn = document.getElementById('sample-btn');
+            const settingsSection = document.getElementById('settings-section');
+            const resultsSection = document.getElementById('results-section');
+            const resultsContainer = document.getElementById('results-container');
+            const qualitySlider = document.getElementById('quality-slider');
+            const qualityValue = document.getElementById('quality-value');
+            const widthInput = document.getElementById('width-input');
+            const keepAspect = document.getElementById('keep-aspect');
+            const formatSelect = document.getElementById('format-select');
+            const compressBtn = document.getElementById('compress-btn');
+            const downloadAllBtn = document.getElementById('download-all-btn');
+
+            // Variables
+            let files = [];
+            let compressedFiles = [];
+
+            // Event Listeners
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            sampleBtn.addEventListener('click', loadSampleImage);
+            fileInput.addEventListener('change', handleFileSelect);
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
+            qualitySlider.addEventListener('input', updateQualityValue);
+            compressBtn.addEventListener('click', compressImages);
+            downloadAllBtn.addEventListener('click', downloadAll);
+
+            // Functions
+            function updateQualityValue() {
+                qualityValue.textContent = qualitySlider.value;
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('active');
+            }
+
+            function handleDragLeave(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('active');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('active');
+                
+                if (e.dataTransfer.files.length) {
+                    files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+                    if (files.length) {
+                        prepareForCompression();
+                    } else {
+                        showError('Please select image files only.');
+                    }
+                }
+            }
+
+            function handleFileSelect(e) {
+                if (e.target.files.length) {
+                    files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+                    if (files.length) {
+                        prepareForCompression();
+                    } else {
+                        showError('Please select image files only.');
+                    }
+                }
+            }
+
+            function prepareForCompression() {
+                settingsSection.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                resultsContainer.innerHTML = '';
+                compressedFiles = [];
+                downloadAllBtn.classList.add('hidden');
+            }
+
+            function loadSampleImage() {
+                // Using a sample image URL
+                fetch('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&auto=format')
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const file = new File([blob], 'sample-image.jpg', { type: 'image/jpeg' });
+                        files = [file];
+                        prepareForCompression();
+                    })
+                    .catch(error => {
+                        showError('Failed to load sample image. Please try again.');
+                        console.error(error);
+                    });
+            }
+
+            function compressImages() {
+                if (!files.length) {
+                    showError('Please select at least one image.');
+                    return;
+                }
+
+                compressBtn.disabled = true;
+                compressBtn.textContent = 'Compressing...';
+                compressedFiles = [];
+                resultsContainer.innerHTML = '';
+                
+                const quality = parseInt(qualitySlider.value) / 100;
+                const width = widthInput.value ? parseInt(widthInput.value) : null;
+                const format = formatSelect.value === 'auto' ? null : formatSelect.value;
+                
+                const compressionPromises = files.map(file => {
+                    return new Promise((resolve) => {
+                        new Compressor(file, {
+                            quality: quality,
+                            width: width,
+                            height: keepAspect.checked ? null : width,
+                            convertSize: Infinity,
+                            format: format,
+                            success(result) {
+                                const compressedFile = new File([result], file.name, { type: result.type });
+                                resolve({ original: file, compressed: compressedFile });
+                            },
+                            error(err) {
+                                console.error(err);
+                                resolve({ original: file, error: true });
+                            }
+                        });
+                    });
+                });
+
+                Promise.all(compressionPromises).then(results => {
+                    compressedFiles = results.filter(r => !r.error);
+                    showResults(results);
+                    compressBtn.disabled = false;
+                    compressBtn.textContent = 'Compress Images';
+                });
+            }
+
+            function showResults(results) {
+                resultsSection.classList.remove('hidden');
+                resultsContainer.innerHTML = '';
+                
+                if (compressedFiles.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg">
+                            No images were successfully compressed. Please try again with different settings.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (compressedFiles.length > 1) {
+                    downloadAllBtn.classList.remove('hidden');
+                }
+                
+                results.forEach((result, index) => {
+                    if (result.error) {
+                        resultsContainer.innerHTML += `
+                            <div class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg mb-4">
+                                Failed to compress ${result.original.name}. The image might be corrupted or the format is not supported.
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    const originalFile = result.original;
+                    const compressedFile = result.compressed;
+                    
+                    const originalSize = (originalFile.size / 1024).toFixed(2);
+                    const compressedSize = (compressedFile.size / 1024).toFixed(2);
+                    const reduction = ((1 - compressedFile.size / originalFile.size) * 100).toFixed(2);
+                    
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'bg-gray-50 dark:bg-gray-700 rounded-lg p-4';
+                    resultItem.innerHTML = `
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="md:w-1/2">
+                                <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2">${originalFile.name}</h3>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600 dark:text-gray-400">Original: ${originalSize} KB</span>
+                                    <span class="text-gray-600 dark:text-gray-400">Compressed: ${compressedSize} KB</span>
+                                </div>
+                                <div class="flex justify-between text-sm mb-4">
+                                    <span class="text-gray-600 dark:text-gray-400">Reduction: ${reduction}%</span>
+                                    <span class="text-gray-600 dark:text-gray-400">${compressedFile.type.split('/')[1].toUpperCase()}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="download-btn bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-3 rounded text-sm transition" data-index="${index}">Download</button>
+                                    <button class="compare-btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 py-1 px-3 rounded text-sm transition" data-index="${index}">Compare</button>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 flex items-center justify-center">
+                                <img src="${URL.createObjectURL(compressedFile)}" alt="Compressed preview" class="max-h-40 max-w-full rounded border border-gray-200 dark:border-gray-600">
+                            </div>
+                        </div>
+                        <div class="comparison-view hidden mt-4 h-64 bg-gray-100 dark:bg-gray-600 rounded-lg overflow-hidden relative">
+                            <!-- Comparison slider will be inserted here -->
+                        </div>
+                    `;
+                    
+                    resultsContainer.appendChild(resultItem);
+                });
+                
+                // Add event listeners to the buttons
+                document.querySelectorAll('.download-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        downloadFile(compressedFiles[index].compressed);
+                    });
+                });
+                
+                document.querySelectorAll('.compare-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const resultItem = this.closest('.bg-gray-50');
+                        const comparisonView = resultItem.querySelector('.comparison-view');
+                        const isHidden = comparisonView.classList.contains('hidden');
+                        
+                        // Hide all other comparison views
+                        document.querySelectorAll('.comparison-view').forEach(view => {
+                            if (view !== comparisonView) {
+                                view.classList.add('hidden');
+                            }
+                        });
+                        
+                        if (isHidden) {
+                            showComparison(compressedFiles[index], comparisonView);
+                            comparisonView.classList.remove('hidden');
+                        } else {
+                            comparisonView.classList.add('hidden');
+                        }
+                    });
+                });
+            }
+
+            function showComparison(filePair, container) {
+                container.innerHTML = `
+                    <div class="comparison-slider">
+                        <div class="before">
+                            <img src="${URL.createObjectURL(filePair.original)}" alt="Original" class="h-full w-full object-contain">
+                        </div>
+                        <div class="after">
+                            <img src="${URL.createObjectURL(filePair.compressed)}" alt="Compressed" class="h-full w-full object-contain">
+                        </div>
+                        <div class="slider-handle"></div>
+                    </div>
+                `;
+                
+                // Initialize the comparison slider
+                const slider = container.querySelector('.comparison-slider');
+                const handle = slider.querySelector('.slider-handle');
+                const before = slider.querySelector('.before');
+                let isDragging = false;
+                
+                function moveSlider(e) {
+                    if (!isDragging) return;
+                    
+                    let x;
+                    if (e.type === 'mousemove') {
+                        x = e.pageX - slider.getBoundingClientRect().left;
+                    } else if (e.type === 'touchmove') {
+                        x = e.touches[0].pageX - slider.getBoundingClientRect().left;
+                    }
+                    
+                    const sliderWidth = slider.offsetWidth;
+                    let position = (x / sliderWidth) * 100;
+                    
+                    // Keep position within bounds
+                    position = Math.max(0, Math.min(100, position));
+                    
+                    before.style.width = `${position}%`;
+                    handle.style.left = `${position}%`;
+                }
+                
+                handle.addEventListener('mousedown', () => isDragging = true);
+                handle.addEventListener('touchstart', () => isDragging = true);
+                
+                document.addEventListener('mousemove', moveSlider);
+                document.addEventListener('touchmove', moveSlider);
+                
+                document.addEventListener('mouseup', () => isDragging = false);
+                document.addEventListener('touchend', () => isDragging = false);
+            }
+
+            function downloadFile(file) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(file);
+                a.download = file.name || 'compressed-image';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }
+
+            function downloadAll() {
+                compressedFiles.forEach(filePair => {
+                    downloadFile(filePair.compressed);
+                });
+            }
+
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg mb-4';
+                errorDiv.textContent = message;
+                
+                const uploadSection = document.getElementById('upload-section');
+                if (uploadSection.querySelector('.bg-red-100')) {
+                    uploadSection.querySelector('.bg-red-100').replaceWith(errorDiv);
+                } else {
+                    uploadSection.appendChild(errorDiv);
+                }
+                
+                setTimeout(() => {
+                    errorDiv.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                    setTimeout(() => errorDiv.remove(), 500);
+                }, 3000);
+            }
+
+            // Initialize dark mode toggle if needed
+            // You can add a dark mode toggle button in your UI if desired
+            // This is just an example of how to handle dark mode
+            function checkDarkModePreference() {
+                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+            
+            checkDarkModePreference();
+        });
+    </script>
+</body>
+</html> 
